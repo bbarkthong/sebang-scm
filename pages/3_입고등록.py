@@ -9,8 +9,27 @@ from database.models import OrderMaster, OrderDetail, Warehouse
 from utils.validators import validate_qty
 import pandas as pd
 
+# Streamlit 기본 페이지 네비게이션 숨김
+st.markdown("""
+<style>
+div[data-testid="stSidebarNav"],
+nav[data-testid="stSidebarNav"],
+section[data-testid="stSidebarNav"],
+ul[data-testid="stSidebarNav"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # 역할 확인 (제조담당자만 접근 가능)
 require_role(["제조담당자"])
+
+# 사이드바 표시
+from utils.sidebar import show_sidebar
+show_sidebar()
 
 st.title("입고 등록")
 st.markdown("---")
@@ -97,7 +116,6 @@ try:
                                 
                                 with col1:
                                     st.markdown(f"**{detail.item_name}**")
-                                    st.caption(f"코드: {detail.item_code}")
                                 
                                 with col2:
                                     st.markdown(f"주문수량: {detail.order_qty:,}")
@@ -196,7 +214,6 @@ try:
                     receipt_data.append({
                         "입고일자": receipt.received_date.strftime("%Y-%m-%d"),
                         "순번": receipt.order_seq,
-                        "품목코드": receipt.item_code,
                         "품목명": receipt.item_name,
                         "입고수량": f"{receipt.received_qty:,}",
                         "입고자": receipt.received_by,

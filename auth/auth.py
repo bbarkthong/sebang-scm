@@ -56,7 +56,14 @@ def logout():
 
 def is_authenticated() -> bool:
     """인증 상태 확인"""
-    return st.session_state.get("authenticated", False)
+    authenticated = st.session_state.get("authenticated", False)
+    user = st.session_state.get("user", {})
+    
+    # 세션이 있지만 사용자 정보가 없으면 인증되지 않은 것으로 처리
+    if authenticated and (not user or not user.get("username")):
+        return False
+    
+    return authenticated
 
 
 def get_current_user() -> dict:
@@ -67,7 +74,8 @@ def get_current_user() -> dict:
 def require_auth():
     """인증이 필요한 페이지에서 사용"""
     if not is_authenticated():
-        st.error("로그인이 필요합니다.")
+        logout()  # 세션 정리
+        show_login_page()
         st.stop()
 
 
@@ -75,8 +83,18 @@ def require_role(allowed_roles: list):
     """특정 역할만 접근 가능하도록 제한"""
     require_auth()
     user = get_current_user()
+    
+    # 사용자 정보가 없으면 로그인 페이지로 이동
+    if not user or not user.get("username"):
+        logout()
+        show_login_page()
+        st.stop()
+    
     if user.get("role") not in allowed_roles:
         st.error(f"이 페이지는 {', '.join(allowed_roles)}만 접근할 수 있습니다.")
+        st.info("접근 권한이 없습니다. 메인 페이지로 돌아가주세요.")
+        if st.button("메인 페이지로 이동"):
+            st.switch_page("app.py")
         st.stop()
 
 

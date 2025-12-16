@@ -24,6 +24,25 @@ def load_custom_css():
     except Exception:
         # CSS 파일이 없어도 계속 진행
         pass
+    
+    # Streamlit 기본 페이지 네비게이션 강제 숨김 (인라인 CSS로 추가 보장)
+    st.markdown("""
+    <style>
+    /* Streamlit 기본 페이지 네비게이션 완전히 숨김 - 모든 가능한 선택자 사용 */
+    div[data-testid="stSidebarNav"],
+    nav[data-testid="stSidebarNav"],
+    section[data-testid="stSidebarNav"],
+    ul[data-testid="stSidebarNav"],
+    .css-1d391kg,
+    .css-1lcbmhc,
+    .css-1y4p8pa {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        overflow: hidden !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 load_custom_css()
 
@@ -38,13 +57,21 @@ if "db_initialized" not in st.session_state:
 # 인증 확인
 if not is_authenticated():
     show_login_page()
+    st.stop()
 else:
+    # 사용자 정보 확인 (세션 만료 체크)
+    user = get_current_user()
+    if not user or not user.get('username'):
+        # 세션이 만료된 경우 로그인 페이지로 이동
+        logout()
+        show_login_page()
+        st.stop()
+    
     # 사이드바
     with st.sidebar:
         st.title("세방산업 SCM")
         st.markdown("---")
         
-        user = get_current_user()
         st.markdown(f"**사용자:** {user.get('username', '')}")
         st.markdown(f"**역할:** {user.get('role', '')}")
         if user.get('company_name'):
@@ -58,13 +85,40 @@ else:
         
         st.markdown("---")
         st.markdown("### 메뉴")
+        
+        # 역할별 메뉴 표시
+        role = user.get('role', '')
+        
+        # 대시보드 (모든 역할 접근 가능)
+        if st.button("📊 대시보드", use_container_width=True, key="btn_dashboard"):
+            st.switch_page("pages/5_대시보드.py")
+        
+        # 발주사 메뉴
+        if role == "발주사":
+            if st.button("📝 주문 등록", use_container_width=True, key="btn_order_reg"):
+                st.switch_page("pages/1_주문등록.py")
+        
+        # 주문담당자 메뉴
+        elif role == "주문담당자":
+            if st.button("✅ 주문 승인", use_container_width=True, key="btn_order_approval"):
+                st.switch_page("pages/2_주문승인.py")
+            if st.button("🚚 출하 계획", use_container_width=True, key="btn_shipping"):
+                st.switch_page("pages/4_출하계획.py")
+        
+        # 제조담당자 메뉴
+        elif role == "제조담당자":
+            if st.button("📦 입고 등록", use_container_width=True, key="btn_warehouse"):
+                st.switch_page("pages/3_입고등록.py")
+        
+        # Streamlit 기본 페이지 네비게이션 숨김
         st.markdown("""
-        - 📊 대시보드
-        - 📝 주문 등록 (발주사)
-        - ✅ 주문 승인 (주문담당자)
-        - 📦 입고 등록 (제조담당자)
-        - 🚚 출하 계획 (주문담당자)
-        """)
+        <style>
+        /* Streamlit 기본 페이지 네비게이션 완전히 숨김 */
+        div[data-testid="stSidebarNav"] {
+            display: none !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
     
     # 메인 콘텐츠
     st.title("세방산업 SCM 시스템")

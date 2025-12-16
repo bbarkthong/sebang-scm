@@ -10,8 +10,27 @@ from utils.validators import validate_priority
 from config import PRIORITY_MIN, PRIORITY_MAX, PRIORITY_DEFAULT, ORDER_STATUS
 import pandas as pd
 
+# Streamlit 기본 페이지 네비게이션 숨김
+st.markdown("""
+<style>
+div[data-testid="stSidebarNav"],
+nav[data-testid="stSidebarNav"],
+section[data-testid="stSidebarNav"],
+ul[data-testid="stSidebarNav"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # 역할 확인 (주문담당자만 접근 가능)
 require_role(["주문담당자"])
+
+# 사이드바 표시
+from utils.sidebar import show_sidebar
+show_sidebar()
 
 st.title("주문 승인")
 st.markdown("---")
@@ -117,12 +136,11 @@ try:
                         total_amount += amount
                         detail_data.append({
                             "순번": detail.order_seq,
-                            "품목코드": detail.item_code,
                             "품목명": detail.item_name,
                             "주문수량": f"{detail.order_qty:,}",
                             "단가": f"{float(detail.unit_price):,.0f}",
                             "금액": f"{amount:,.0f}",
-                            "출하예정일": detail.planned_shipping_date.strftime("%Y-%m-%d") if detail.planned_shipping_date else ""
+                            "납품예정일": detail.planned_shipping_date.strftime("%Y-%m-%d") if detail.planned_shipping_date else ""
                         })
                     
                     detail_df = pd.DataFrame(detail_data)

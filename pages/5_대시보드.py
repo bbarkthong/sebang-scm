@@ -8,8 +8,27 @@ from database.connection import get_db, close_db
 from database.models import OrderMaster, OrderDetail, Warehouse, ShippingPlan
 import pandas as pd
 
+# Streamlit 기본 페이지 네비게이션 숨김
+st.markdown("""
+<style>
+div[data-testid="stSidebarNav"],
+nav[data-testid="stSidebarNav"],
+section[data-testid="stSidebarNav"],
+ul[data-testid="stSidebarNav"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # 인증 확인
 require_auth()
+
+# 사이드바 표시
+from utils.sidebar import show_sidebar
+show_sidebar()
 
 st.title("대시보드")
 st.markdown("---")

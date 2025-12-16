@@ -9,8 +9,27 @@ from database.models import OrderMaster, OrderDetail, Warehouse, ShippingPlan
 from utils.validators import validate_qty
 import pandas as pd
 
+# Streamlit 기본 페이지 네비게이션 숨김
+st.markdown("""
+<style>
+div[data-testid="stSidebarNav"],
+nav[data-testid="stSidebarNav"],
+section[data-testid="stSidebarNav"],
+ul[data-testid="stSidebarNav"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # 역할 확인 (주문담당자만 접근 가능)
 require_role(["주문담당자"])
+
+# 사이드바 표시
+from utils.sidebar import show_sidebar
+show_sidebar()
 
 st.title("출하 계획")
 st.markdown("---")
@@ -71,7 +90,6 @@ try:
                         "주문일자": order.order_date.strftime("%Y-%m-%d"),
                         "고객사": order.customer_company,
                         "순번": detail.order_seq,
-                        "품목코드": detail.item_code,
                         "품목명": detail.item_name,
                         "주문수량": f"{detail.order_qty:,}",
                         "입고수량": f"{total_received:,}",
@@ -151,7 +169,6 @@ try:
                                 
                                 with col1:
                                     st.markdown(f"**{detail.item_name}**")
-                                    st.caption(f"코드: {detail.item_code}")
                                 
                                 with col2:
                                     st.markdown(f"가용재고: {available_qty:,}")

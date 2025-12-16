@@ -1,9 +1,8 @@
 """
 SQLAlchemy 모델 정의
 """
-from sqlalchemy import Column, Integer, String, Date, DateTime, Decimal, ForeignKey, Text
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, Text, Numeric
+from sqlalchemy.orm import declarative_base, relationship
 from datetime import datetime
 
 Base = declarative_base()
@@ -18,7 +17,20 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     role = Column(String, nullable=False)  # 발주사, 주문담당자, 제조담당자
     company_name = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.now)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+
+
+class ItemMaster(Base):
+    """품목 마스터 테이블"""
+    __tablename__ = "item_master"
+
+    item_code = Column(String, primary_key=True)
+    item_name = Column(String, unique=True, nullable=False)
+    lead_time_days = Column(Integer, nullable=False)  # 납기일수 (주문일자 기준)
+    unit_price = Column(Numeric(10, 2), nullable=False)  # 기본 단가
+    is_active = Column(String, default="Y")  # 사용여부 (Y/N)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, nullable=True)
 
 
 class OrderMaster(Base):
@@ -34,7 +46,7 @@ class OrderMaster(Base):
     approved_by = Column(String, nullable=True)
     approved_at = Column(DateTime, nullable=True)
     created_by = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.now)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
 
     # 관계
     details = relationship("OrderDetail", back_populates="master", cascade="all, delete-orphan")
@@ -49,9 +61,9 @@ class OrderDetail(Base):
     item_code = Column(String, nullable=False)
     item_name = Column(String, nullable=False)
     order_qty = Column(Integer, nullable=False)
-    unit_price = Column(Decimal(10, 2), nullable=False)
+    unit_price = Column(Numeric(10, 2), nullable=False)
     shipping_qty = Column(Integer, default=0)
-    shipping_amount = Column(Decimal(10, 2), default=0)
+    shipping_amount = Column(Numeric(10, 2), default=0)
     planned_shipping_date = Column(Date, nullable=True)
     actual_shipping_date = Column(Date, nullable=True)
 
@@ -71,7 +83,7 @@ class Warehouse(Base):
     received_qty = Column(Integer, nullable=False)
     received_date = Column(Date, nullable=False)
     received_by = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.now)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
 
 
 class ShippingPlan(Base):
@@ -85,5 +97,5 @@ class ShippingPlan(Base):
     planned_qty = Column(Integer, nullable=False)
     status = Column(String, default="계획")  # 계획, 출하완료
     created_by = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.now)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
 
