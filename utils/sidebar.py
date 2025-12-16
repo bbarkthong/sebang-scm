@@ -25,6 +25,8 @@ def show_sidebar():
         if role == "발주사":
             if st.button("📝 주문 등록", use_container_width=True, key="btn_order_reg"):
                 st.switch_page("pages/1_주문등록.py")
+            if st.button("📦 출하 등록", use_container_width=True, key="btn_shipping_reg"):
+                st.switch_page("pages/6_출하등록.py")
         
         # 주문담당자 메뉴
         elif role == "주문담당자":

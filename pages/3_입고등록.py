@@ -46,19 +46,49 @@ try:
     
     if not orders:
         st.info("입고 등록 가능한 주문이 없습니다.")
+        st.markdown("""
+        **입고 등록 절차:**
+        1. 주문담당자가 주문을 승인해야 합니다.
+        2. 승인된 주문에 대해 생산 완료 후 입고 등록을 합니다.
+        3. 모든 항목이 입고 완료되면 주문 상태가 자동으로 '입고완료'로 변경됩니다.
+        """)
     else:
         st.markdown(f"### 입고 등록 가능 주문 (총 {len(orders)}건)")
+        st.markdown("""
+        **입고 등록 방법:**
+        1. 아래 목록에서 입고할 주문을 선택합니다.
+        2. 각 품목의 입고수량과 입고일자를 입력합니다.
+        3. '입고 등록' 버튼을 클릭합니다.
+        4. 모든 항목이 입고 완료되면 주문 상태가 자동으로 '입고완료'로 변경됩니다.
+        """)
         
         # 주문 목록 표시
         order_data = []
         for order in orders:
+            # 각 주문의 입고 진행률 계산
+            order_details = db.query(OrderDetail).filter(
+                OrderDetail.order_no == order.order_no
+            ).all()
+            
+            total_qty = sum(detail.order_qty for detail in order_details)
+            total_received = 0
+            for detail in order_details:
+                receipts = db.query(Warehouse).filter(
+                    Warehouse.order_no == order.order_no,
+                    Warehouse.order_seq == detail.order_seq
+                ).all()
+                total_received += sum(r.received_qty for r in receipts)
+            
+            progress = (total_received / total_qty * 100) if total_qty > 0 else 0
+            
             order_data.append({
                 "주문번호": order.order_no,
                 "주문일자": order.order_date.strftime("%Y-%m-%d"),
                 "주문구분": order.order_type,
                 "고객사": order.customer_company,
                 "상태": order.status,
-                "우선순위": order.priority
+                "우선순위": order.priority,
+                "입고진행률": f"{progress:.1f}% ({total_received:,}/{total_qty:,})"
             })
         
         df = pd.DataFrame(order_data)
@@ -160,6 +190,7 @@ try:
                             else:
                                 # 입고 등록
                                 try:
+                                    # 입고 항목 등록
                                     for item in receipt_items:
                                         warehouse = Warehouse(
                                             order_no=item["order_no"],
@@ -172,31 +203,47 @@ try:
                                         )
                                         db.add(warehouse)
                                     
+                                    # 주문 상태를 "생산중"으로 변경 (입고 등록 시작 시)
+                                    if selected_order.status == "승인":
+                                        selected_order.status = "생산중"
+                                    
                                     # 주문 상태 업데이트 (모든 항목 입고 완료 시)
+                                    # 새로 추가된 항목도 포함하여 다시 조회
+                                    db.flush()  # DB에 반영하여 조회 가능하도록
+                                    
                                     total_received = {}
-                                    for receipt in db.query(Warehouse).filter(
+                                    all_receipts = db.query(Warehouse).filter(
                                         Warehouse.order_no == selected_order_no
-                                    ).all():
+                                    ).all()
+                                    
+                                    for receipt in all_receipts:
                                         key = (receipt.order_no, receipt.order_seq)
                                         total_received[key] = total_received.get(key, 0) + receipt.received_qty
                                     
+                                    # 모든 주문 상세 항목이 입고 완료되었는지 확인
                                     all_received = True
                                     for detail in order_details:
                                         key = (detail.order_no, detail.order_seq)
-                                        if total_received.get(key, 0) < detail.order_qty:
+                                        received_total = total_received.get(key, 0)
+                                        if received_total < detail.order_qty:
                                             all_received = False
                                             break
                                     
                                     if all_received:
                                         selected_order.status = "입고완료"
+                                        db.commit()
+                                        st.success(f"✅ {len(receipt_items)}개 항목이 입고 등록되었습니다. 모든 항목 입고 완료로 주문 상태가 '입고완료'로 변경되었습니다.")
+                                    else:
+                                        db.commit()
+                                        st.success(f"✅ {len(receipt_items)}개 항목이 입고 등록되었습니다.")
                                     
-                                    db.commit()
-                                    st.success(f"{len(receipt_items)}개 항목이 입고 등록되었습니다.")
                                     st.rerun()
                                     
                                 except Exception as e:
                                     db.rollback()
-                                    st.error(f"입고 등록 중 오류 발생: {str(e)}")
+                                    st.error(f"❌ 입고 등록 중 오류 발생: {str(e)}")
+                                    import traceback
+                                    st.code(traceback.format_exc())
                 else:
                     st.warning("주문 상세 정보가 없습니다.")
             

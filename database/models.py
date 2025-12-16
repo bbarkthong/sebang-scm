@@ -95,7 +95,7 @@ class ShippingPlan(Base):
     order_seq = Column(Integer, nullable=False)
     planned_shipping_date = Column(Date, nullable=False)
     planned_qty = Column(Integer, nullable=False)
-    status = Column(String, default="계획")  # 계획, 출하완료
+    status = Column(String, default="계획")  # 계획, 지시, 출하완료
     created_by = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
 

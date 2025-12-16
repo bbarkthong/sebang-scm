@@ -37,6 +37,14 @@ st.markdown("---")
 
 user = get_current_user()
 
+# 상단 버튼 영역
+col_btn1, col_btn2, col_btn3, col_btn4, col_btn5 = st.columns(5)
+with col_btn1:
+    if st.button("초기화면", use_container_width=True, type="secondary"):
+        st.switch_page("pages/5_대시보드.py")
+
+st.markdown("---")
+
 # 필터 옵션
 col1, col2, col3 = st.columns(3)
 with col1:
