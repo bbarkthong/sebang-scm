@@ -1,0 +1,122 @@
+/* 세방산업 SCM 시스템 커스텀 스타일 */
+
+/* 전체 폰트 설정 */
+* {
+    font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+}
+
+/* 헤더 스타일 */
+h1 {
+    color: #1E3A5F;
+    font-weight: bold;
+}
+
+h2, h3 {
+    color: #1E3A5F;
+}
+
+/* 버튼 스타일 */
+.stButton > button {
+    background-color: #1E3A5F;
+    color: white;
+    border-radius: 5px;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.stButton > button:hover {
+    background-color: #4A90E2;
+}
+
+/* 메트릭 카드 스타일 */
+[data-testid="stMetricValue"] {
+    color: #1E3A5F;
+    font-weight: bold;
+}
+
+/* 데이터프레임 스타일 */
+.dataframe {
+    border: 1px solid #e0e0e0;
+}
+
+/* 사이드바 스타일 */
+[data-testid="stSidebar"] {
+    background-color: #F8F9FA;
+}
+
+/* 정보 박스 스타일 */
+.stInfo {
+    background-color: #E3F2FD;
+    border-left: 4px solid #4A90E2;
+}
+
+/* 성공 메시지 스타일 */
+.stSuccess {
+    background-color: #E8F5E9;
+    border-left: 4px solid #28A745;
+}
+
+/* 경고 메시지 스타일 */
+.stWarning {
+    background-color: #FFF3E0;
+    border-left: 4px solid #FFC107;
+}
+
+/* 에러 메시지 스타일 */
+.stError {
+    background-color: #FFEBEE;
+    border-left: 4px solid #DC3545;
+}
+
+/* 긴급 주문 강조 */
+.urgent-order {
+    background-color: #FFEBEE;
+    border-left: 4px solid #FF6B35;
+    padding: 10px;
+    margin: 5px 0;
+}
+
+/* 탭 스타일 */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+}
+
+.stTabs [data-baseweb="tab"] {
+    color: #1E3A5F;
+    font-weight: 500;
+}
+
+.stTabs [aria-selected="true"] {
+    background-color: #1E3A5F;
+    color: white;
+}
+
+/* 입력 필드 포커스 스타일 */
+.stTextInput > div > div > input:focus {
+    border-color: #4A90E2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.stSelectbox > div > div > select:focus {
+    border-color: #4A90E2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+/* 구분선 스타일 */
+hr {
+    border-color: #E0E0E0;
+    margin: 20px 0;
+}
+
+/* 테이블 헤더 스타일 */
+.dataframe thead th {
+    background-color: #1E3A5F;
+    color: white;
+    font-weight: bold;
+}
+
+/* 테이블 행 호버 효과 */
+.dataframe tbody tr:hover {
+    background-color: #F5F5F5;
+}
+
