@@ -55,9 +55,19 @@ with tab1:
     if "order_details" not in st.session_state:
         st.session_state.order_details = []
     
-    # 주문일자 먼저 입력 (품목 추가 시 납기일 계산에 필요)
+    # 주문 정보 입력 (이미지 참고: 상단에 주요 정보 배치)
     st.markdown("### 주문 정보")
-    col_info1, col_info2 = st.columns(2)
+    
+    # 상단 버튼 영역 (이미지 참고: 상단 버튼들)
+    col_btn1, col_btn2, col_btn3, col_btn4, col_btn5 = st.columns(5)
+    with col_btn1:
+        if st.button("초기화면", use_container_width=True, type="secondary"):
+            st.switch_page("pages/5_대시보드.py")
+    
+    st.markdown("---")
+    
+    # 주문 기본 정보
+    col_info1, col_info2, col_info3 = st.columns(3)
     with col_info1:
         order_date = st.date_input("주문일자 *", value=date.today(), key="order_date_input")
         # 주문번호 자동 생성
@@ -71,6 +81,12 @@ with tab1:
     
     with col_info2:
         customer_company = st.text_input("고객사 *", value=user.get("company_name", ""), key="customer_company_input")
+        order_type = st.selectbox("주문구분 *", options=list(ORDER_TYPE.keys()), key="order_type_input_preview")
+    
+    with col_info3:
+        st.markdown("<br>", unsafe_allow_html=True)  # 공간 맞추기
+        st.caption(f"**등록자:** {user.get('username', '')}")
+        st.caption(f"**등록일시:** {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     
     # 품목 마스터 조회
     db = get_db()
@@ -214,15 +230,30 @@ with tab1:
         
         # 주문 등록 폼 (항목 추가 후 발주서 생성)
         if st.session_state.order_details:
-            st.markdown("### 주문 등록")
+            st.markdown("---")
+            st.markdown("### 발주서 생성")
+            
+            # 주문 요약 정보 표시 (이미지 참고: 상단에 요약 정보)
+            total_qty = sum(detail["order_qty"] for detail in st.session_state.order_details)
+            total_amount = sum(detail["order_qty"] * detail["unit_price"] for detail in st.session_state.order_details)
+            
+            col_summary1, col_summary2, col_summary3 = st.columns(3)
+            with col_summary1:
+                st.metric("총 품목 수", f"{len(st.session_state.order_details)}개")
+            with col_summary2:
+                st.metric("총 주문 수량", f"{total_qty:,}개")
+            with col_summary3:
+                st.metric("총 주문 금액", f"{total_amount:,.0f}원")
+            
             with st.form("manual_order_form"):
-                order_type = st.selectbox("주문구분 *", options=list(ORDER_TYPE.keys()), key="order_type_input")
-                
-                submit_button = st.form_submit_button("주문 등록 (발주서 생성)", use_container_width=True, type="primary")
+                submit_button = st.form_submit_button("📄 발주서 생성 및 등록", use_container_width=True, type="primary")
                 
                 if submit_button:
                     # 검증
                     errors = []
+                    
+                    # order_type은 이미 위에서 선택됨
+                    order_type = st.session_state.get("order_type_input_preview", list(ORDER_TYPE.keys())[0])
                     
                     is_valid, msg = validate_order_date(order_date)
                     if not is_valid:

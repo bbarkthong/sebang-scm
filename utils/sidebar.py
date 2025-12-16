@@ -11,22 +11,10 @@ def show_sidebar():
         st.title("세방산업 SCM")
         st.markdown("---")
         
-        user = get_current_user()
-        st.markdown(f"**사용자:** {user.get('username', '')}")
-        st.markdown(f"**역할:** {user.get('role', '')}")
-        if user.get('company_name'):
-            st.markdown(f"**회사:** {user.get('company_name', '')}")
-        
-        st.markdown("---")
-        
-        if st.button("로그아웃", use_container_width=True, type="secondary"):
-            logout()
-            st.rerun()
-        
-        st.markdown("---")
+        # 메뉴를 먼저 표시 (위로 올림)
         st.markdown("### 메뉴")
         
-        # 역할별 메뉴 표시
+        user = get_current_user()
         role = user.get('role', '')
         
         # 대시보드 (모든 역할 접근 가능)
@@ -49,6 +37,20 @@ def show_sidebar():
         elif role == "제조담당자":
             if st.button("📦 입고 등록", use_container_width=True, key="btn_warehouse"):
                 st.switch_page("pages/3_입고등록.py")
+        
+        st.markdown("---")
+        
+        # 사용자 정보 영역 (축소)
+        st.markdown("#### 사용자 정보")
+        st.caption(f"**{user.get('username', '')}** ({user.get('role', '')})")
+        if user.get('company_name'):
+            st.caption(f"*{user.get('company_name', '')}*")
+        
+        st.markdown("---")
+        
+        if st.button("로그아웃", use_container_width=True, type="secondary"):
+            logout()
+            st.rerun()
         
         # Streamlit 기본 페이지 네비게이션 숨김
         st.markdown("""
