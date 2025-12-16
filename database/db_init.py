@@ -42,14 +42,14 @@ def init_db():
                     "username": "order_manager",
                     "password": "order123",
                     "role": "주문담당자",
-                    "company_name": "세방산업"
+                    "company_name": "세방리튬배터리"
                 },
                 {
                     "user_id": "user004",
                     "username": "manufacturing",
                     "password": "mfg123",
                     "role": "제조담당자",
-                    "company_name": "세방산업"
+                    "company_name": "세방리튬배터리"
                 }
             ]
 

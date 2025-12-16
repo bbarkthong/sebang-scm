@@ -1,5 +1,5 @@
 """
-세방산업 SCM 시스템 메인 애플리케이션
+세방리튬배터리 SCM 시스템 메인 애플리케이션
 """
 import streamlit as st
 from auth.auth import is_authenticated, show_login_page, logout, get_current_user
@@ -7,7 +7,7 @@ from database.db_init import init_db
 
 # 페이지 설정
 st.set_page_config(
-    page_title="세방산업 SCM 시스템",
+    page_title="세방리튬배터리 SCM 시스템",
     page_icon="🏭",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -69,7 +69,7 @@ else:
     
     # 사이드바
     with st.sidebar:
-        st.title("세방산업 SCM")
+        st.title("세방리튬배터리 SCM")
         st.markdown("---")
         
         st.markdown(f"**사용자:** {user.get('username', '')}")
@@ -121,7 +121,7 @@ else:
         """, unsafe_allow_html=True)
     
     # 메인 콘텐츠
-    st.title("세방산업 SCM 시스템")
+    st.title("세방리튬배터리 SCM 시스템")
     st.markdown("---")
     
     user = get_current_user()
@@ -130,7 +130,7 @@ else:
     st.markdown("""
     ### 시스템 개요
     
-    세방산업 SCM 시스템은 발주부터 출하까지의 전 과정을 관리하는 통합 시스템입니다.
+    세방리튬배터리 SCM 시스템은 발주부터 출하까지의 전 과정을 관리하는 통합 시스템입니다.
     
     #### 주요 기능
     

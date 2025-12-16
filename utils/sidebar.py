@@ -8,7 +8,7 @@ from auth.auth import get_current_user, logout
 def show_sidebar():
     """공통 사이드바 표시"""
     with st.sidebar:
-        st.title("세방산업 SCM")
+        st.title("세방리튬배터리 SCM")
         st.markdown("---")
         
         # 메뉴를 먼저 표시 (위로 올림)

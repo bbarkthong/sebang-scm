@@ -100,7 +100,7 @@ def require_role(allowed_roles: list):
 
 def show_login_page():
     """로그인 페이지 표시"""
-    st.title("세방산업 SCM 시스템")
+    st.title("세방리튬배터리 SCM 시스템")
     st.markdown("---")
     
     with st.form("login_form"):
@@ -129,7 +129,7 @@ def show_login_page():
         - 삼성SDI: `samsung_sdi` / `samsung123`
         - 현대자동차: `hyundai_motor` / `hyundai123`
         
-        **세방산업 계정:**
+        **세방리튬배터리 계정:**
         - 주문담당자: `order_manager` / `order123`
         - 제조담당자: `manufacturing` / `mfg123`
         """)

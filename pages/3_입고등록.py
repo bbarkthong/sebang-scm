@@ -1,5 +1,5 @@
 """
-입고 등록 페이지 (세방산업 제조담당자)
+입고 등록 페이지 (세방리튬배터리 제조담당자)
 """
 import streamlit as st
 from datetime import date, datetime

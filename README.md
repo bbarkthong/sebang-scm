@@ -1,6 +1,6 @@
-# 세방산업 SCM 시스템
+# 세방리튬배터리 SCM 시스템
 
-세방산업의 공급망 관리(Supply Chain Management) 시스템입니다. 발주부터 출하까지의 전 과정을 통합 관리합니다.
+세방리튬배터리의 공급망 관리(Supply Chain Management) 시스템입니다. 발주부터 출하까지의 전 과정을 통합 관리합니다.
 
 ## 주요 기능
 
@@ -70,7 +70,7 @@ streamlit run app.py
 - **삼성SDI**: `samsung_sdi` / `samsung123`
 - **현대자동차**: `hyundai_motor` / `hyundai123`
 
-### 세방산업 계정
+### 세방리튬배터리 계정
 - **주문담당자**: `order_manager` / `order123`
 - **제조담당자**: `manufacturing` / `mfg123`
 
@@ -127,5 +127,5 @@ sebang-scm/
 
 ## 라이선스
 
-이 프로젝트는 세방산업 내부 사용을 위한 것입니다.
+이 프로젝트는 세방리튬배터리 내부 사용을 위한 것입니다.
 

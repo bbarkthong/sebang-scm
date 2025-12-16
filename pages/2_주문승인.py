@@ -1,5 +1,5 @@
 """
-주문 승인 페이지 (세방산업 주문담당자)
+주문 승인 페이지 (세방리튬배터리 주문담당자)
 """
 import streamlit as st
 from datetime import datetime
