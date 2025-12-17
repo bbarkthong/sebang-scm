@@ -5,7 +5,7 @@ def get_orders_for_warehousing(db):
     """Fetches orders that are ready for warehousing ('Approved' or 'In Production')."""
     return db.query(OrderMaster).filter(
         OrderMaster.status.in_(["승인", "생산중"])
-    ).order_by(OrderMaster.priority.desc(), OrderMaster.order_date).all()
+    ).order_by(OrderMaster.order_no.desc()).all()
 
 def get_order_receipt_status(db, order_no):
     """

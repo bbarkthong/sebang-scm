@@ -5,7 +5,7 @@ def get_orders_for_shipping_plan(db):
     """Fetches orders that are fully received and ready for shipping plan creation."""
     return db.query(OrderMaster).filter(
         OrderMaster.status == "입고완료"
-    ).order_by(OrderMaster.priority.desc(), OrderMaster.order_date).all()
+    ).order_by(OrderMaster.order_no.desc()).all()
 
 def get_item_inventory_status(db, order_no, order_seq):
     """
