@@ -116,9 +116,9 @@ def show_login_page():
                 if success:
                     st.session_state["authenticated"] = True
                     st.session_state["user"] = user_info
+                    st.session_state["current_page"] = "대시보드"  # 대시보드로 설정
                     st.success(message)
-                    # 로그인 성공 후 대시보드로 이동
-                    st.switch_page("pages/page_5_dashboard.py")
+                    st.rerun()  # 페이지 새로고침하여 대시보드 표시
                 else:
                     st.error(message)
     

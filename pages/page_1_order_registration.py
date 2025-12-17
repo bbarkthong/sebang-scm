@@ -40,8 +40,10 @@ def render_manual_order_tab(db, user, page_state):
     col1, col2, col3 = st.columns(3)
     order_date = col1.date_input("주문일자 *", date.today(), key="man_order_date")
     customer_company = col2.text_input("고객사 *", user.get("company_name", ""), key="man_customer")
-    order_type = col2.selectbox("주문구분 *", list(ORDER_TYPE.keys()), key="man_order_type")
-    col3.caption(f"**등록자:** {user.get('username', '')}<br>**등록일시:** {datetime.now().strftime('%Y-%m-%d %H:%M')}", unsafe_allow_html=True)
+    order_type = col3.selectbox("주문구분 *", list(ORDER_TYPE.keys()), key="man_order_type")
+    
+    col1.caption(f"**등록일시:** {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    col2.caption(f"**등록자:** {user.get('username', '')}")
     
     # Add Item Section
     items = get_active_items(db)
@@ -60,19 +62,20 @@ def render_add_detail_section(item_dict, order_date, page_state):
     """Renders the section for adding a new order detail item."""
     st.markdown("### 주문 상세 항목 추가")
     with st.expander("항목 추가", expanded=True):
-        cols = st.columns(4)
+        cols = st.columns(3)
         item_names = ["선택하세요"] + list(item_dict.keys())
         selected_name = cols[0].selectbox("품목명 *", item_names)
         
         item, qty = None, 1
         if selected_name != "선택하세요":
             item = item_dict[selected_name]
-            qty = cols[1].number_input("주문수량 *", 1, value=1)
-            cols[1].text_input("단가", f"{float(item.unit_price):,.0f}원", disabled=True)
+            cols[0].text_input("단가", f"{float(item.unit_price):,.0f}원", disabled=True)
             min_date = order_date + timedelta(days=item.lead_time_days) if item.lead_time_days > 0 else order_date
-            ship_date = cols[2].date_input("납품예정일", min_date, min_value=min_date)
+            qty = cols[1].number_input("주문수량 *", 1, value=1)
+            ship_date = cols[1].date_input("납품예정일", min_date, min_value=min_date)
+        cols[2].caption(f"")
 
-        if cols[3].button("항목 추가", use_container_width=True, type="primary"):
+        if cols[2].button("항목 추가", use_container_width=True, type="primary"):
             if not item:
                 st.error("품목을 선택해주세요.")
             else:
@@ -86,50 +89,50 @@ def render_order_details_list(page_state):
     """Displays the interactive list of added order details."""
     st.markdown("#### 등록된 주문 상세")
     
-    # if not page_state["order_details"]:
-    #     return
+    if not page_state["order_details"]:
+        return
     
-    # # Header
-    # header_cols = st.columns([1, 2, 1, 1, 1, 1])
-    # with header_cols[0]:
-    #     st.write("**순번**")
-    # with header_cols[1]:
-    #     st.write("**품목명**")
-    # with header_cols[2]:
-    #     st.write("**주문수량**")
-    # with header_cols[3]:
-    #     st.write("**단가**")
-    # with header_cols[4]:
-    #     st.write("**납품예정일**")
-    # with header_cols[5]:
-    #     st.write("**삭제**")
+    # Header
+    header_cols = st.columns([1, 2, 1, 1, 1, 1])
+    with header_cols[0]:
+        st.write("**순번**")
+    with header_cols[1]:
+        st.write("**품목명**")
+    with header_cols[2]:
+        st.write("**주문수량**")
+    with header_cols[3]:
+        st.write("**단가**")
+    with header_cols[4]:
+        st.write("**납품예정일**")
+    with header_cols[5]:
+        st.write("**삭제**")
     
-    # st.markdown("---")
+    st.markdown("---")
     
-    # # Details rows
-    # for idx, detail in enumerate(page_state["order_details"]):
-    #     detail_cols = st.columns([1, 2, 1, 1, 1, 1])
+    # Details rows
+    for idx, detail in enumerate(page_state["order_details"]):
+        detail_cols = st.columns([1, 2, 1, 1, 1, 1])
         
-    #     with detail_cols[0]:
-    #         st.write(f"{idx + 1}")
-    #     with detail_cols[1]:
-    #         st.write(detail['item_name'])
-    #     with detail_cols[2]:
-    #         st.write(f"{detail['order_qty']:,}개")
-    #     with detail_cols[3]:
-    #         st.write(f"{detail['unit_price']:,.0f}원")
-    #     with detail_cols[4]:
-    #         st.write(detail["planned_shipping_date"].strftime("%Y-%m-%d") if detail.get("planned_shipping_date") else "-")
-    #     with detail_cols[5]:
-    #         if st.button("삭제", key=f"delete_{idx}", type="secondary"):
-    #             page_state["order_details"].pop(idx)
-    #             st.rerun()
+        with detail_cols[0]:
+            st.write(f"{idx + 1}")
+        with detail_cols[1]:
+            st.write(detail['item_name'])
+        with detail_cols[2]:
+            st.write(f"{detail['order_qty']:,}개")
+        with detail_cols[3]:
+            st.write(f"{detail['unit_price']:,.0f}원")
+        with detail_cols[4]:
+            st.write(detail["planned_shipping_date"].strftime("%Y-%m-%d") if detail.get("planned_shipping_date") else "-")
+        with detail_cols[5]:
+            if st.button("삭제", key=f"delete_{idx}", type="secondary"):
+                page_state["order_details"].pop(idx)
+                st.rerun()
     
-    # st.markdown("---")
+    st.markdown("---")
     
-    # if st.button("전체 삭제", type="secondary", key="clear_all_details"):
-    #     page_state["order_details"] = []
-    #     st.rerun()
+    if st.button("전체 삭제", type="secondary", key="clear_all_details"):
+        page_state["order_details"] = []
+        st.rerun()
 
 def render_create_order_form(db, user, page_state, order_data):
     """Renders the final submission form for a manual order."""
@@ -164,10 +167,13 @@ def render_excel_upload_tab(db, user):
 
     with st.form("excel_order_form"):
         st.markdown("### 주문 정보 입력")
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         order_date = col1.date_input("주문일자 *", date.today(), key="excel_order_date")
-        order_type = col1.selectbox("주문구분 *", list(ORDER_TYPE.keys()), key="excel_order_type")
         customer_company = col2.text_input("고객사 *", user.get("company_name", ""), key="excel_customer")
+        order_type = col3.selectbox("주문구분 *", list(ORDER_TYPE.keys()), key="excel_order_type")
+
+        col1.caption(f"**등록일시:** {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+        col2.caption(f"**등록자:** {user.get('username', '')}")
 
         if st.form_submit_button("주문 등록", use_container_width=True, type="primary"):
             try:

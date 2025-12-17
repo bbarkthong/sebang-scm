@@ -28,6 +28,22 @@ def show_sidebar(pages: dict):
         pages (dict): A dictionary mapping page names to their functions.
                       This is used to filter pages based on user role.
     """
+    # Streamlit 기본 페이지 네비게이션 숨김
+    st.markdown("""
+    <style>
+    div[data-testid="stSidebarNav"],
+    nav[data-testid="stSidebarNav"],
+    section[data-testid="stSidebarNav"],
+    ul[data-testid="stSidebarNav"],
+    li[data-testid="stSidebarNav"] {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        overflow: hidden !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     with st.sidebar:
         st.title("세방리튬배터리 SCM")
         st.markdown("---")
@@ -45,9 +61,9 @@ def show_sidebar(pages: dict):
         for page_name in accessible_pages:
             if page_name in pages: # Ensure the page is defined in the app
                 icon = PAGE_ICONS.get(page_name, "")
-                if st.button(f"{icon} {page_name}", use_container_width=True):
+                if st.button(f"{icon} {page_name}", use_container_width=True, key=f"sidebar_{page_name}"):
                     st.session_state.current_page = page_name
-                    # No need for st.rerun() here, Streamlit's flow will handle it
+                    st.rerun()
 
         st.markdown("---")
 

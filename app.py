@@ -25,12 +25,21 @@ def load_custom_css():
     <style>
     /* Hide Streamlit's default hamburger menu and page navigation */
     div[data-testid="stSidebarNav"],
-    nav[data-testid="stSidebarNav"] {
+    nav[data-testid="stSidebarNav"],
+    section[data-testid="stSidebarNav"],
+    ul[data-testid="stSidebarNav"],
+    li[data-testid="stSidebarNav"] {
         display: none !important;
         visibility: hidden !important;
+        height: 0 !important;
+        overflow: hidden !important;
     }
     /* Additional selectors to ensure it's hidden */
     .css-1d391kg, .css-1lcbmhc, .css-1y4p8pa {
+        display: none !important;
+    }
+    /* Hide Streamlit's sidebar navigation completely */
+    [data-testid="stSidebarNav"] {
         display: none !important;
     }
     </style>
