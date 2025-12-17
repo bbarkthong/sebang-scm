@@ -48,6 +48,43 @@ def load_custom_css():
         }
         </style>
         """, unsafe_allow_html=True)
+    
+    # 로그인 페이지일 때 사이드바 자동 접기
+    if not is_authenticated():
+        st.markdown("""
+        <script>
+        // 로그인 페이지일 때 사이드바 자동 접기
+        window.addEventListener('load', function() {
+            // 사이드바 접기 버튼 찾기
+            const sidebarButton = document.querySelector('[data-testid="collapsedControl"]');
+            if (sidebarButton) {
+                // 사이드바가 열려있으면 접기
+                const sidebar = document.querySelector('[data-testid="stSidebar"]');
+                if (sidebar && sidebar.offsetWidth > 0) {
+                    sidebarButton.click();
+                }
+            }
+        });
+        
+        // 사이드바 상태 확인 및 접기
+        setTimeout(function() {
+            const sidebar = document.querySelector('[data-testid="stSidebar"]');
+            const sidebarButton = document.querySelector('[data-testid="collapsedControl"]');
+            if (sidebar && sidebarButton && sidebar.offsetWidth > 0) {
+                sidebarButton.click();
+            }
+        }, 100);
+        </script>
+        <style>
+        /* 로그인 페이지일 때 사이드바 숨기기 */
+        [data-testid="stSidebar"] {
+            display: none !important;
+        }
+        [data-testid="collapsedControl"] {
+            display: none !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
 
 # --- Page Definitions ---
 PAGES = {

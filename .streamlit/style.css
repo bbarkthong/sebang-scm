@@ -13,6 +13,12 @@ li[data-testid="stSidebarNav"] {
     overflow: hidden !important;
 }
 
+/* 로그인 페이지일 때 사이드바 자동 접기 */
+.login-page [data-testid="stSidebar"],
+.login-page [data-testid="collapsedControl"] {
+    display: none !important;
+}
+
 /* 전체 폰트 설정 - 세방산업 스타일 */
 * {
     font-family: 'Noto Sans KR', 'Malgun Gothic', '맑은 고딕', 'Apple SD Gothic Neo', sans-serif;
