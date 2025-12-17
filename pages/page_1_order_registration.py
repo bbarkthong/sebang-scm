@@ -175,7 +175,7 @@ def render_excel_upload_tab(db, user):
         col1.caption(f"**등록일시:** {datetime.now().strftime('%Y-%m-%d %H:%M')}")
         col2.caption(f"**등록자:** {user.get('username', '')}")
 
-        if st.form_submit_button("주문 등록", use_container_width=True, type="primary"):
+        if st.form_submit_button("발주서 생성", use_container_width=True, type="primary"):
             try:
                 order_no = create_order(db, user, {
                     "order_date": order_date, "order_type": order_type, "customer_company": customer_company
@@ -183,4 +183,4 @@ def render_excel_upload_tab(db, user):
                 st.success(f"주문이 성공적으로 등록되었습니다. (주문번호: {order_no})")
                 st.rerun()
             except Exception as e:
-                st.error(f"주문 등록 중 오류: {e}")
+                st.error(f"발주서 생성 중 오류: {e}")
