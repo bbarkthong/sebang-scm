@@ -46,7 +46,6 @@ def show_sidebar(pages: dict):
     
     with st.sidebar:
         st.title("세방리튬배터리 SCM")
-        st.markdown("---")
 
         # --- Menu ---
         st.markdown("### 메뉴")
@@ -69,13 +68,13 @@ def show_sidebar(pages: dict):
 
         # --- User Information ---
         st.markdown("#### 사용자 정보")
-        st.caption(f"**{user.get('username', '')}** ({user.get('role', '')})")
+        col1, col2 = st.columns(2)
+        col1.caption(f"**{user.get('username', '')}**")
+        col1.caption(f"({user.get('role', '')})")
         if user.get('company_name'):
-            st.caption(f"*{user.get('company_name', '')}*")
+            col1.caption(f"*{user.get('company_name', '')}*")
+        logout_button = col2.button("로그아웃", use_container_width=True, type="secondary")
 
-        st.markdown("---")
-
-        if st.button("로그아웃", use_container_width=True, type="secondary"):
+        if logout_button:
             logout()
-            # After logout, is_authenticated() will be false, and the login page will show.
             st.rerun()

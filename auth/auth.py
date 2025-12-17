@@ -99,8 +99,17 @@ def require_role(allowed_roles: list):
 
 
 def show_login_page():
-    """로그인 페이지 표시"""
-    st.title("세방리튬배터리 SCM 시스템")
+    """로그인 페이지 표시 - 세방산업 디자인"""
+    st.markdown("""
+    <div style="text-align: center; padding: 2rem 0;">
+        <h1 style="color: #003366; font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;">
+            세방산업 SCM 시스템
+        </h1>
+        <p style="color: #666666; font-size: 1rem; margin-top: 0;">
+            Supply Chain Management System
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
     st.markdown("---")
     
     with st.form("login_form"):

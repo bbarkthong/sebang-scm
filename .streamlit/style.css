@@ -1,127 +1,366 @@
-/* 세방리튬배터리 SCM 시스템 커스텀 스타일 */
+/* 세방산업 SCM 시스템 커스텀 스타일 */
+/* 레퍼런스 우선순위: 1) gbattery.com, 2) sebangind.com, 3) spc.co.kr */
 
 /* Streamlit 기본 페이지 네비게이션 숨김 */
-div[data-testid="stSidebarNav"] {
+div[data-testid="stSidebarNav"],
+nav[data-testid="stSidebarNav"],
+section[data-testid="stSidebarNav"],
+ul[data-testid="stSidebarNav"],
+li[data-testid="stSidebarNav"] {
     display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
 }
 
-/* 전체 폰트 설정 */
+/* 전체 폰트 설정 - 세방산업 스타일 */
 * {
-    font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+    font-family: 'Noto Sans KR', 'Malgun Gothic', '맑은 고딕', 'Apple SD Gothic Neo', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* 헤더 스타일 */
+/* 메인 컨테이너 스타일 */
+.main .block-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    max-width: 1400px;
+}
+
+/* 헤더 스타일 - 세방산업 프로페셔널 톤 */
 h1 {
-    color: #1E3A5F;
-    font-weight: bold;
+    color: #003366;
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    border-bottom: 3px solid #0066CC;
+    padding-bottom: 0.5rem;
 }
 
-h2, h3 {
-    color: #1E3A5F;
+h2 {
+    color: #003366;
+    font-weight: 600;
+    font-size: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
 }
 
-/* 버튼 스타일 */
+h3 {
+    color: #003366;
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin-top: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+/* 버튼 스타일 - 세방산업 메인 컬러 */
 .stButton > button {
-    background-color: #1E3A5F;
+    background-color: #003366;
     color: white;
-    border-radius: 5px;
+    border: none;
+    border-radius: 6px;
     font-weight: 500;
-    transition: background-color 0.3s;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 51, 102, 0.2);
 }
 
 .stButton > button:hover {
-    background-color: #4A90E2;
+    background-color: #0066CC;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 51, 102, 0.3);
 }
 
-/* 메트릭 카드 스타일 */
+.stButton > button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 51, 102, 0.2);
+}
+
+/* Secondary 버튼 스타일 */
+.stButton > button[kind="secondary"] {
+    background-color: #F5F7FA;
+    color: #003366;
+    border: 1px solid #E0E4E8;
+}
+
+.stButton > button[kind="secondary"]:hover {
+    background-color: #E0E4E8;
+    border-color: #0066CC;
+}
+
+/* 메트릭 카드 스타일 - 세방산업 스타일 */
 [data-testid="stMetricValue"] {
-    color: #1E3A5F;
-    font-weight: bold;
+    color: #003366;
+    font-weight: 700;
+    font-size: 2rem;
 }
 
-/* 데이터프레임 스타일 */
+[data-testid="stMetricLabel"] {
+    color: #666666;
+    font-weight: 500;
+}
+
+/* 데이터프레임 스타일 - 깔끔한 테이블 */
 .dataframe {
-    border: 1px solid #e0e0e0;
+    border: 1px solid #E0E4E8;
+    border-radius: 6px;
+    overflow: hidden;
 }
 
-/* 사이드바 스타일 */
+/* 테이블 헤더 스타일 - 세방산업 메인 컬러 */
+.dataframe thead th {
+    background-color: #003366;
+    color: white;
+    font-weight: 600;
+    padding: 12px;
+    text-align: left;
+}
+
+/* 테이블 행 스타일 */
+.dataframe tbody tr {
+    border-bottom: 1px solid #F5F7FA;
+}
+
+.dataframe tbody tr:hover {
+    background-color: #F5F7FA;
+    transition: background-color 0.2s ease;
+}
+
+.dataframe tbody td {
+    padding: 10px 12px;
+    color: #1A1A1A;
+}
+
+/* 사이드바 스타일 - 세방산업 스타일 */
 [data-testid="stSidebar"] {
-    background-color: #F8F9FA;
+    background-color: #FFFFFF;
+    border-right: 1px solid #E0E4E8;
+}
+
+/* [data-testid="stSidebar"] .element-container {
+    padding: 0.5rem 0;
+} */
+
+/* 사이드바 타이틀 */
+[data-testid="stSidebar"] h1 {
+    color: #003366;
+    font-size: 1.5rem;
+    font-weight: 700;
+    border-bottom: 2px solid #0066CC;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+/* 사이드바 메뉴 버튼 */
+[data-testid="stSidebar"] .stButton > button {
+    width: 100%;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    /* margin-bottom: 0.5rem; */
+    border-radius: 4px;
+    background-color: transparent;
+    color: #003366;
+    box-shadow: none;
+}
+
+[data-testid="stSidebar"] .stButton > button:hover {
+    background-color: #F5F7FA;
+    color: #0066CC;
+    transform: none;
+    box-shadow: none;
 }
 
 /* 정보 박스 스타일 */
 .stInfo {
-    background-color: #E3F2FD;
-    border-left: 4px solid #4A90E2;
+    background-color: #E6F2FF;
+    border-left: 4px solid #0066CC;
+    border-radius: 4px;
+    padding: 1rem;
 }
 
 /* 성공 메시지 스타일 */
 .stSuccess {
-    background-color: #E8F5E9;
-    border-left: 4px solid #28A745;
+    background-color: #E6F9E6;
+    border-left: 4px solid #00AA44;
+    border-radius: 4px;
+    padding: 1rem;
 }
 
 /* 경고 메시지 스타일 */
 .stWarning {
-    background-color: #FFF3E0;
-    border-left: 4px solid #FFC107;
+    background-color: #FFF4E6;
+    border-left: 4px solid #FF9900;
+    border-radius: 4px;
+    padding: 1rem;
 }
 
 /* 에러 메시지 스타일 */
 .stError {
-    background-color: #FFEBEE;
-    border-left: 4px solid #DC3545;
+    background-color: #FFE6E6;
+    border-left: 4px solid #CC0000;
+    border-radius: 4px;
+    padding: 1rem;
 }
 
-/* 긴급 주문 강조 */
+/* 긴급 주문 강조 - 세방산업 스타일 */
 .urgent-order {
-    background-color: #FFEBEE;
-    border-left: 4px solid #FF6B35;
-    padding: 10px;
-    margin: 5px 0;
+    background-color: #FFF4E6;
+    border-left: 4px solid #FF6600;
+    border-radius: 4px;
+    padding: 1rem;
+    margin: 10px 0;
 }
 
-/* 탭 스타일 */
+/* 탭 스타일 - 세방산업 스타일 */
 .stTabs [data-baseweb="tab-list"] {
-    gap: 8px;
+    gap: 0;
+    border-bottom: 2px solid #E0E4E8;
+    background-color: #F5F7FA;
+    padding: 0.5rem 0.5rem 0 0.5rem;
+    border-radius: 6px 6px 0 0;
 }
 
 .stTabs [data-baseweb="tab"] {
-    color: #1E3A5F;
+    color: #666666;
     font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px 6px 0 0;
+    transition: all 0.3s ease;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+    color: #003366;
+    background-color: rgba(0, 102, 204, 0.1);
 }
 
 .stTabs [aria-selected="true"] {
-    background-color: #1E3A5F;
-    color: white;
+    background-color: #FFFFFF;
+    color: #003366;
+    font-weight: 600;
+    border-bottom: 3px solid #0066CC;
 }
 
-/* 입력 필드 포커스 스타일 */
-.stTextInput > div > div > input:focus {
-    border-color: #4A90E2;
-    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+/* 입력 필드 포커스 스타일 - 세방산업 스타일 */
+.stTextInput > div > div > input:focus,
+.stSelectbox > div > div > select:focus,
+.stNumberInput > div > div > input:focus,
+.stDateInput > div > div > input:focus {
+    border-color: #0066CC;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+    outline: none;
 }
 
-.stSelectbox > div > div > select:focus {
-    border-color: #4A90E2;
-    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+/* 입력 필드 스타일 */
+.stTextInput > div > div > input,
+.stSelectbox > div > div > select,
+.stNumberInput > div > div > input {
+    border: 1px solid #E0E4E8;
+    border-radius: 4px;
+    padding: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.stTextInput > div > div > input:hover,
+.stSelectbox > div > div > select:hover {
+    border-color: #0066CC;
 }
 
 /* 구분선 스타일 */
 hr {
-    border-color: #E0E0E0;
-    margin: 20px 0;
+    border: none;
+    border-top: 2px solid #E0E4E8;
+    margin: 2rem 0;
 }
 
-/* 테이블 헤더 스타일 */
-.dataframe thead th {
-    background-color: #1E3A5F;
-    color: white;
-    font-weight: bold;
+/* Expander 스타일 */
+.streamlit-expanderHeader {
+    background-color: #F5F7FA;
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    color: #003366;
 }
 
-/* 테이블 행 호버 효과 */
-.dataframe tbody tr:hover {
-    background-color: #F5F5F5;
+.streamlit-expanderHeader:hover {
+    background-color: #E0E4E8;
 }
 
+/* Form 스타일 */
+.stForm {
+    border: 1px solid #E0E4E8;
+    border-radius: 6px;
+    padding: 1.5rem;
+    background-color: #FFFFFF;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Selectbox 드롭다운 스타일 */
+.stSelectbox > div > div > select {
+    background-color: #FFFFFF;
+    color: #1A1A1A;
+}
+
+/* Caption 스타일 */
+.stCaption {
+    color: #666666;
+    font-size: 0.875rem;
+}
+
+/* 로그인 페이지 스타일 */
+.login-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: #FFFFFF;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 카드 스타일 */
+.card {
+    background-color: #FFFFFF;
+    border: 1px solid #E0E4E8;
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 스크롤바 스타일 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #F5F7FA;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #E0E4E8;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #0066CC;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .main .block-container {
+        padding: 1rem;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    h2 {
+        font-size: 1.25rem;
+    }
+}

@@ -34,13 +34,18 @@ PRIORITY_MIN = 1
 PRIORITY_MAX = 9
 PRIORITY_DEFAULT = 5
 
-# 디자인 색상
+# 디자인 색상 (세방산업 디자인 시스템)
+# 레퍼런스 우선순위: 1) gbattery.com, 2) sebangind.com, 3) spc.co.kr
 COLORS = {
-    "primary": "#1E3A5F",
-    "secondary": "#4A90E2",
-    "accent": "#FF6B35",
-    "success": "#28A745",
-    "warning": "#FFC107",
-    "danger": "#DC3545"
+    "primary": "#003366",      # 세방산업 메인 블루 (프로페셔널, 신뢰감)
+    "secondary": "#0066CC",    # 세방산업 서브 블루 (액션, 링크)
+    "accent": "#FF6600",       # 강조 색상 (긴급, 중요)
+    "success": "#00AA44",      # 성공 (승인, 완료)
+    "warning": "#FF9900",      # 경고 (대기, 주의)
+    "danger": "#CC0000",       # 위험 (거부, 오류)
+    "light_bg": "#F5F7FA",     # 연한 배경
+    "border": "#E0E4E8",       # 테두리 색상
+    "text_primary": "#1A1A1A", # 주요 텍스트
+    "text_secondary": "#666666" # 보조 텍스트
 }
 
