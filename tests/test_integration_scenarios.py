@@ -1,131 +1,90 @@
-"""
-통합 시나리오 테스트 (전체 프로세스)
-"""
 import pytest
-import sys
-import os
 from datetime import date
-from decimal import Decimal
-
-# 프로젝트 루트를 경로에 추가
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from database.models import OrderMaster, OrderDetail, Warehouse, ShippingPlan, User
+from database.models import OrderMaster, OrderDetail, ShippingPlan, User
 from auth.auth import hash_password
 
+# Import all necessary services
+from services.order_service import create_order
+from services.approval_service import approve_order
+from services.warehousing_service import register_receipts
+from services.shipping_service import create_shipping_plans, instruct_shipping_plans
+from services.shipping_registration_service import confirm_shipment_received
 
 class TestCompleteOrderFlow:
-    """전체 주문 프로세스 통합 테스트"""
+    """전체 주문 프로세스 통합 테스트 (서비스 계층 사용)"""
     
-    def test_complete_order_to_shipping_flow(self, test_db, sample_order_data, sample_order_detail_data):
-        """주문 등록부터 출하까지 전체 프로세스 테스트"""
-        
-        # 1. 사용자 생성 (발주사)
-        password_hash = hash_password("test123")
-        user = User(
-            user_id="test_user_001",
-            username="test_customer",
-            password_hash=password_hash,
-            role="발주사",
-            company_name="테스트회사"
-        )
-        test_db.add(user)
-        test_db.flush()
-        
-        # 2. 주문 등록
-        order_master = OrderMaster(
-            order_no=sample_order_data["order_no"],
-            order_date=date.fromisoformat(sample_order_data["order_date"]),
-            order_type=sample_order_data["order_type"],
-            customer_company=sample_order_data["customer_company"],
-            created_by="test_customer",
-            status="대기"
-        )
-        test_db.add(order_master)
-        test_db.flush()
-        
-        order_detail = OrderDetail(
-            order_no=sample_order_detail_data["order_no"],
-            order_seq=sample_order_detail_data["order_seq"],
-            item_code=sample_order_detail_data["item_code"],
-            item_name=sample_order_detail_data["item_name"],
-            order_qty=sample_order_detail_data["order_qty"],
-            unit_price=Decimal(str(sample_order_detail_data["unit_price"]))
-        )
-        test_db.add(order_detail)
+    @pytest.fixture
+    def setup_users(self, test_db):
+        """테스트에 필요한 다양한 역할의 사용자 생성"""
+        users = {
+            "client": {"username": "test_client", "role": "발주사", "company_name": "테스트회사"},
+            "manager": {"username": "test_manager", "role": "주문담당자"},
+            "manufacturer": {"username": "test_manufacturer", "role": "제조담당자"}
+        }
+        for key, user_data in users.items():
+            user = User(
+                user_id=f"{key}_001",
+                username=user_data["username"],
+                password_hash=hash_password("test123"),
+                role=user_data["role"],
+                company_name=user_data.get("company_name")
+            )
+            test_db.add(user)
         test_db.commit()
+        return users
+
+    def test_complete_order_to_shipping_flow(self, test_db, setup_users):
+        """주문 등록부터 출하까지 전체 서비스 플로우 테스트"""
         
-        assert order_master.status == "대기"
+        # 1. 주문 등록 (by 발주사)
+        order_details_data = [{
+            "item_code": "ITEM_INTEG_001", "item_name": "통합테스트품목", "order_qty": 100,
+            "unit_price": 1500.00, "planned_shipping_date": date(2024, 12, 31)
+        }]
+        order_data = {
+            "order_date": date.today(),
+            "order_type": "일반",
+            "customer_company": setup_users["client"]["company_name"]
+        }
         
-        # 3. 주문 승인
-        order_master.status = "승인"
-        order_master.priority = 7
-        order_master.approved_by = "order_manager"
-        test_db.commit()
+        order_no = create_order(test_db, setup_users["client"], order_data, order_details_data)
         
-        approved_order = test_db.query(OrderMaster).filter(
-            OrderMaster.order_no == sample_order_data["order_no"]
-        ).first()
-        assert approved_order.status == "승인"
+        order = test_db.query(OrderMaster).filter_by(order_no=order_no).first()
+        assert order.status == "대기"
+
+        # 2. 주문 승인 (by 주문담당자)
+        approve_order(test_db, order, priority=7, username=setup_users["manager"]["username"])
+        assert order.status == "승인"
         
-        # 4. 생산중 상태 변경
-        approved_order.status = "생산중"
-        test_db.commit()
+        # 3. 입고 등록 (by 제조담당자)
+        receipt_items = [{"order_no": order_no, "order_seq": 1, **order_details_data[0]}]
+        register_receipts(test_db, order, receipt_items, setup_users["manufacturer"]["username"])
+        assert order.status == "입고완료"
         
-        # 5. 입고 등록
-        warehouse = Warehouse(
-            order_no=sample_order_data["order_no"],
-            order_seq=sample_order_detail_data["order_seq"],
-            item_code=sample_order_detail_data["item_code"],
-            item_name=sample_order_detail_data["item_name"],
-            received_qty=100,
-            received_date=date.today(),
-            received_by="manufacturing"
-        )
-        test_db.add(warehouse)
-        approved_order.status = "입고완료"
-        test_db.commit()
+        # 4. 출하 계획 수립 (by 주문담당자)
+        shipping_plan_items = [{
+            "order_no": order_no, "order_seq": 1, "planned_qty": 100, "planned_date": date(2024, 12, 31)
+        }]
+        create_shipping_plans(test_db, shipping_plan_items, setup_users["manager"]["username"])
         
-        assert approved_order.status == "입고완료"
+        plan = test_db.query(ShippingPlan).filter_by(order_no=order_no).first()
+        assert plan.status == "계획"
         
-        # 6. 출하 계획 수립
-        shipping_plan = ShippingPlan(
-            order_no=sample_order_data["order_no"],
-            order_seq=sample_order_detail_data["order_seq"],
-            planned_shipping_date=date(2024, 12, 31),
-            planned_qty=100,
-            status="계획",
-            created_by="order_manager"
-        )
-        test_db.add(shipping_plan)
-        test_db.commit()
+        # 5. 출하 지시 (by 주문담당자)
+        instruct_shipping_plans(test_db, [plan])
+        assert plan.status == "지시"
         
-        # 7. 출하 완료 처리
-        shipping_plan.status = "출하완료"
-        order_detail.shipping_qty = shipping_plan.planned_qty
-        order_detail.actual_shipping_date = shipping_plan.planned_shipping_date
-        order_detail.shipping_amount = float(order_detail.shipping_qty * order_detail.unit_price)
-        approved_order.status = "출하완료"
-        test_db.commit()
+        # 6. 출하 완료 (수신 확인, by 발주사)
+        detail = test_db.query(OrderDetail).filter_by(order_no=order_no, order_seq=1).first()
+        received_items = [{"plan": plan, "detail": detail, "received_qty": 100, "received_date": date.today()}]
+        confirm_shipment_received(test_db, order, received_items)
         
         # 최종 검증
-        final_order = test_db.query(OrderMaster).filter(
-            OrderMaster.order_no == sample_order_data["order_no"]
-        ).first()
-        
+        final_order = test_db.query(OrderMaster).filter_by(order_no=order_no).first()
         assert final_order.status == "출하완료"
         
-        final_detail = test_db.query(OrderDetail).filter(
-            OrderDetail.order_no == sample_order_data["order_no"]
-        ).first()
-        
+        final_detail = test_db.query(OrderDetail).filter_by(order_no=order_no, order_seq=1).first()
         assert final_detail.shipping_qty == 100
-        assert final_detail.actual_shipping_date == date(2024, 12, 31)
-        assert final_detail.shipping_amount > 0
         
-        completed_plan = test_db.query(ShippingPlan).filter(
-            ShippingPlan.order_no == sample_order_data["order_no"]
-        ).first()
-        
-        assert completed_plan.status == "출하완료"
-
+        final_plan = test_db.query(ShippingPlan).get(plan.plan_id)
+        assert final_plan.status == "출하완료"

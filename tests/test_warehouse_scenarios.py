@@ -1,180 +1,75 @@
-"""
-입고 등록 시나리오 테스트
-"""
 import pytest
-import sys
-import os
 from datetime import date
-from decimal import Decimal
-
-# 프로젝트 루트를 경로에 추가
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from database.models import OrderMaster, OrderDetail, Warehouse
-
+from services.order_service import create_order
+from services.approval_service import approve_order
+from services.warehousing_service import register_receipts
+from database.models import OrderMaster, Warehouse
 
 class TestWarehouseRegistration:
-    """입고 등록 시나리오 테스트"""
-    
-    def test_register_warehouse_receipt(self, test_db, sample_order_data, sample_order_detail_data):
-        """입고 등록 테스트"""
-        # 승인된 주문 생성
-        order_master = OrderMaster(
-            order_no=sample_order_data["order_no"],
-            order_date=date.fromisoformat(sample_order_data["order_date"]),
-            order_type=sample_order_data["order_type"],
-            customer_company=sample_order_data["customer_company"],
-            created_by=sample_order_data["created_by"],
-            status="승인"
-        )
-        test_db.add(order_master)
-        test_db.flush()
+    """입고 등록 시나리오 테스트 (서비스 사용)"""
+
+    @pytest.fixture
+    def approved_order(self, test_db):
+        """테스트를 위한 승인된 주문 생성"""
+        user_info = {"username": "test_placer"}
+        order_data = {
+            "order_date": date(2024, 1, 15),
+            "order_type": "일반",
+            "customer_company": "테스트회사"
+        }
+        details_data = [
+            {"item_code": "ITEM001", "item_name": "테스트 품목 1", "order_qty": 100, "unit_price": 1000, "planned_shipping_date": date(2024, 1, 31)},
+            {"item_code": "ITEM002", "item_name": "테스트 품목 2", "order_qty": 200, "unit_price": 2000, "planned_shipping_date": date(2024, 1, 31)}
+        ]
         
-        order_detail = OrderDetail(
-            order_no=sample_order_detail_data["order_no"],
-            order_seq=sample_order_detail_data["order_seq"],
-            item_code=sample_order_detail_data["item_code"],
-            item_name=sample_order_detail_data["item_name"],
-            order_qty=sample_order_detail_data["order_qty"],
-            unit_price=Decimal(str(sample_order_detail_data["unit_price"]))
-        )
-        test_db.add(order_detail)
-        test_db.commit()
+        order_no = create_order(test_db, user_info, order_data, details_data)
+        order = test_db.query(OrderMaster).filter_by(order_no=order_no).first()
+        approve_order(test_db, order, priority=5, username="manager")
+        return order
+
+    def test_register_warehouse_receipt(self, test_db, approved_order):
+        """입고 등록 서비스 테스트"""
+        receipt_items = [{
+            "order_no": approved_order.order_no, "order_seq": 1, "item_code": "ITEM001", "item_name": "테스트 품목 1",
+            "received_qty": 100, "received_date": date.today()
+        }]
         
-        # 입고 등록
-        warehouse = Warehouse(
-            order_no=sample_order_data["order_no"],
-            order_seq=sample_order_detail_data["order_seq"],
-            item_code=sample_order_detail_data["item_code"],
-            item_name=sample_order_detail_data["item_name"],
-            received_qty=100,
-            received_date=date.today(),
-            received_by="manufacturing"
-        )
-        test_db.add(warehouse)
-        test_db.commit()
+        register_receipts(test_db, approved_order, receipt_items, "manufacturer")
         
-        # 검증
-        saved_receipt = test_db.query(Warehouse).filter(
-            Warehouse.order_no == sample_order_data["order_no"]
-        ).first()
+        saved_receipt = test_db.query(Warehouse).filter_by(order_no=approved_order.order_no, order_seq=1).first()
         
         assert saved_receipt is not None
         assert saved_receipt.received_qty == 100
-        assert saved_receipt.received_by == "manufacturing"
-    
-    def test_partial_receipt(self, test_db, sample_order_data, sample_order_detail_data):
-        """부분 입고 테스트"""
-        # 승인된 주문 생성
-        order_master = OrderMaster(
-            order_no=sample_order_data["order_no"],
-            order_date=date.fromisoformat(sample_order_data["order_date"]),
-            order_type=sample_order_data["order_type"],
-            customer_company=sample_order_data["customer_company"],
-            created_by=sample_order_data["created_by"],
-            status="승인"
-        )
-        test_db.add(order_master)
-        test_db.flush()
+        assert saved_receipt.received_by == "manufacturer"
         
-        order_detail = OrderDetail(
-            order_no=sample_order_detail_data["order_no"],
-            order_seq=sample_order_detail_data["order_seq"],
-            item_code=sample_order_detail_data["item_code"],
-            item_name=sample_order_detail_data["item_name"],
-            order_qty=200,  # 주문 수량 200
-            unit_price=Decimal(str(sample_order_detail_data["unit_price"]))
-        )
-        test_db.add(order_detail)
-        test_db.commit()
-        
-        # 부분 입고 (100개만 입고)
-        warehouse = Warehouse(
-            order_no=sample_order_data["order_no"],
-            order_seq=sample_order_detail_data["order_seq"],
-            item_code=sample_order_detail_data["item_code"],
-            item_name=sample_order_detail_data["item_name"],
-            received_qty=100,  # 200개 중 100개만 입고
-            received_date=date.today(),
-            received_by="manufacturing"
-        )
-        test_db.add(warehouse)
-        test_db.commit()
-        
-        # 검증
-        saved_receipt = test_db.query(Warehouse).filter(
-            Warehouse.order_no == sample_order_data["order_no"]
-        ).first()
-        
-        assert saved_receipt.received_qty == 100
-        
-        # 추가 입고
-        warehouse2 = Warehouse(
-            order_no=sample_order_data["order_no"],
-            order_seq=sample_order_detail_data["order_seq"],
-            item_code=sample_order_detail_data["item_code"],
-            item_name=sample_order_detail_data["item_name"],
-            received_qty=100,  # 나머지 100개 입고
-            received_date=date.today(),
-            received_by="manufacturing"
-        )
-        test_db.add(warehouse2)
-        test_db.commit()
-        
-        # 총 입고 수량 확인
-        total_received = test_db.query(Warehouse).filter(
-            Warehouse.order_no == sample_order_data["order_no"],
-            Warehouse.order_seq == sample_order_detail_data["order_seq"]
-        ).all()
-        
-        total_qty = sum(r.received_qty for r in total_received)
-        assert total_qty == 200
-    
-    def test_complete_receipt_updates_order_status(self, test_db, sample_order_data, sample_order_detail_data):
-        """전체 입고 완료 시 주문 상태 변경 테스트"""
-        # 승인된 주문 생성
-        order_master = OrderMaster(
-            order_no=sample_order_data["order_no"],
-            order_date=date.fromisoformat(sample_order_data["order_date"]),
-            order_type=sample_order_data["order_type"],
-            customer_company=sample_order_data["customer_company"],
-            created_by=sample_order_data["created_by"],
-            status="생산중"
-        )
-        test_db.add(order_master)
-        test_db.flush()
-        
-        order_detail = OrderDetail(
-            order_no=sample_order_detail_data["order_no"],
-            order_seq=sample_order_detail_data["order_seq"],
-            item_code=sample_order_detail_data["item_code"],
-            item_name=sample_order_detail_data["item_name"],
-            order_qty=100,
-            unit_price=Decimal(str(sample_order_detail_data["unit_price"]))
-        )
-        test_db.add(order_detail)
-        test_db.commit()
-        
-        # 전체 입고
-        warehouse = Warehouse(
-            order_no=sample_order_data["order_no"],
-            order_seq=sample_order_detail_data["order_seq"],
-            item_code=sample_order_detail_data["item_code"],
-            item_name=sample_order_detail_data["item_name"],
-            received_qty=100,  # 전체 입고
-            received_date=date.today(),
-            received_by="manufacturing"
-        )
-        test_db.add(warehouse)
-        
-        # 주문 상태를 입고완료로 변경 (실제 로직에서는 모든 항목이 입고되었을 때 자동 변경)
-        order_master.status = "입고완료"
-        test_db.commit()
-        
-        # 검증
-        updated_order = test_db.query(OrderMaster).filter(
-            OrderMaster.order_no == sample_order_data["order_no"]
-        ).first()
-        
-        assert updated_order.status == "입고완료"
+        # Status should change to 'In Production'
+        updated_order = test_db.query(OrderMaster).filter_by(order_no=approved_order.order_no).first()
+        assert updated_order.status == "생산중"
 
+    def test_partial_receipt(self, test_db, approved_order):
+        """부분 입고 서비스 테스트"""
+        # First partial receipt
+        receipts1 = [{"order_no": approved_order.order_no, "order_seq": 2, "item_code": "ITEM002", "item_name": "테스트 품목 2", "received_qty": 50, "received_date": date.today()}]
+        register_receipts(test_db, approved_order, receipts1, "manufacturer")
+
+        total_received = sum(r.received_qty for r in test_db.query(Warehouse).filter_by(order_no=approved_order.order_no, order_seq=2).all())
+        assert total_received == 50
+        
+        # Second partial receipt
+        receipts2 = [{"order_no": approved_order.order_no, "order_seq": 2, "item_code": "ITEM002", "item_name": "테스트 품목 2", "received_qty": 150, "received_date": date.today()}]
+        register_receipts(test_db, approved_order, receipts2, "manufacturer")
+
+        total_received = sum(r.received_qty for r in test_db.query(Warehouse).filter_by(order_no=approved_order.order_no, order_seq=2).all())
+        assert total_received == 200
+
+    def test_complete_receipt_updates_order_status(self, test_db, approved_order):
+        """전체 입고 완료 시 주문 상태 '입고완료' 변경 테스트"""
+        receipts = [
+            {"order_no": approved_order.order_no, "order_seq": 1, "item_code": "ITEM001", "item_name": "테스트 품목 1", "received_qty": 100, "received_date": date.today()},
+            {"order_no": approved_order.order_no, "order_seq": 2, "item_code": "ITEM002", "item_name": "테스트 품목 2", "received_qty": 200, "received_date": date.today()}
+        ]
+        
+        register_receipts(test_db, approved_order, receipts, "manufacturer")
+        
+        updated_order = test_db.query(OrderMaster).filter_by(order_no=approved_order.order_no).first()
+        assert updated_order.status == "입고완료"

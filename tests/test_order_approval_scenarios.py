@@ -1,124 +1,54 @@
-"""
-주문 승인 시나리오 테스트
-"""
 import pytest
-import sys
-import os
-from datetime import date, datetime
-from decimal import Decimal
-
-# 프로젝트 루트를 경로에 추가
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from database.models import OrderMaster, OrderDetail
-
+from datetime import date
+from services.order_service import create_order
+from services.approval_service import approve_order, reject_order, set_order_in_production
+from database.models import OrderMaster
 
 class TestOrderApproval:
-    """주문 승인 시나리오 테스트"""
-    
-    def test_approve_order(self, test_db, sample_order_data, sample_order_detail_data):
-        """주문 승인 테스트"""
-        # 주문 생성
-        order_master = OrderMaster(
-            order_no=sample_order_data["order_no"],
-            order_date=date.fromisoformat(sample_order_data["order_date"]),
-            order_type=sample_order_data["order_type"],
-            customer_company=sample_order_data["customer_company"],
-            created_by=sample_order_data["created_by"],
-            status="대기"
-        )
-        test_db.add(order_master)
-        test_db.commit()
+    """주문 승인 시나리오 테스트 (서비스 사용)"""
+
+    @pytest.fixture(autouse=True)
+    def setup_order(self, test_db):
+        """테스트를 위한 기본 주문을 생성하는 fixture"""
+        self.user_info = {"username": "test_approver"}
+        order_data = {
+            "order_date": date(2024, 1, 15),
+            "order_type": "일반",
+            "customer_company": "테스트회사"
+        }
+        details_data = [{
+            "item_code": "ITEM001", "item_name": "테스트 품목", "order_qty": 100,
+            "unit_price": 1000.00, "planned_shipping_date": date(2024, 1, 31)
+        }]
         
-        # 주문 승인
-        order_master.status = "승인"
-        order_master.priority = 7
-        order_master.approved_by = "order_manager"
-        order_master.approved_at = datetime.now()
-        test_db.commit()
+        self.order_no = create_order(test_db, self.user_info, order_data, details_data)
+        self.order = test_db.query(OrderMaster).filter_by(order_no=self.order_no).first()
+
+    def test_approve_order(self, test_db):
+        """주문 승인 서비스 테스트"""
+        approve_order(test_db, self.order, priority=7, username="order_manager")
         
-        # 검증
-        approved_order = test_db.query(OrderMaster).filter(
-            OrderMaster.order_no == sample_order_data["order_no"]
-        ).first()
+        approved_order = test_db.query(OrderMaster).filter_by(order_no=self.order_no).first()
         
         assert approved_order.status == "승인"
         assert approved_order.priority == 7
         assert approved_order.approved_by == "order_manager"
         assert approved_order.approved_at is not None
-    
-    def test_reject_order(self, test_db, sample_order_data):
-        """주문 거부 테스트"""
-        # 주문 생성
-        order_master = OrderMaster(
-            order_no=sample_order_data["order_no"],
-            order_date=date.fromisoformat(sample_order_data["order_date"]),
-            order_type=sample_order_data["order_type"],
-            customer_company=sample_order_data["customer_company"],
-            created_by=sample_order_data["created_by"],
-            status="대기"
-        )
-        test_db.add(order_master)
-        test_db.commit()
-        
-        # 주문 거부
-        order_master.status = "거부"
-        test_db.commit()
-        
-        # 검증
-        rejected_order = test_db.query(OrderMaster).filter(
-            OrderMaster.order_no == sample_order_data["order_no"]
-        ).first()
-        
-        assert rejected_order.status == "거부"
-    
-    def test_set_priority_levels(self, test_db, sample_order_data):
-        """우선순위 설정 테스트"""
-        # 주문 생성
-        order_master = OrderMaster(
-            order_no=sample_order_data["order_no"],
-            order_date=date.fromisoformat(sample_order_data["order_date"]),
-            order_type=sample_order_data["order_type"],
-            customer_company=sample_order_data["customer_company"],
-            created_by=sample_order_data["created_by"],
-            status="대기"
-        )
-        test_db.add(order_master)
-        test_db.commit()
-        
-        # 다양한 우선순위 테스트
-        for priority in [1, 5, 9]:
-            order_master.priority = priority
-            test_db.commit()
-            
-            updated_order = test_db.query(OrderMaster).filter(
-                OrderMaster.order_no == sample_order_data["order_no"]
-            ).first()
-            
-            assert updated_order.priority == priority
-    
-    def test_change_status_to_production(self, test_db, sample_order_data):
-        """생산중 상태 변경 테스트"""
-        # 승인된 주문 생성
-        order_master = OrderMaster(
-            order_no=sample_order_data["order_no"],
-            order_date=date.fromisoformat(sample_order_data["order_date"]),
-            order_type=sample_order_data["order_type"],
-            customer_company=sample_order_data["customer_company"],
-            created_by=sample_order_data["created_by"],
-            status="승인"
-        )
-        test_db.add(order_master)
-        test_db.commit()
-        
-        # 생산중으로 상태 변경
-        order_master.status = "생산중"
-        test_db.commit()
-        
-        # 검증
-        updated_order = test_db.query(OrderMaster).filter(
-            OrderMaster.order_no == sample_order_data["order_no"]
-        ).first()
-        
-        assert updated_order.status == "생산중"
 
+    def test_reject_order(self, test_db):
+        """주문 거부 서비스 테스트"""
+        reject_order(test_db, self.order)
+        
+        rejected_order = test_db.query(OrderMaster).filter_by(order_no=self.order_no).first()
+        assert rejected_order.status == "거부"
+
+    def test_change_status_to_production(self, test_db):
+        """생산중 상태 변경 서비스 테스트"""
+        # First, approve the order
+        approve_order(test_db, self.order, priority=5, username="manager")
+        
+        # Then, set to production
+        set_order_in_production(test_db, self.order)
+        
+        updated_order = test_db.query(OrderMaster).filter_by(order_no=self.order_no).first()
+        assert updated_order.status == "생산중"

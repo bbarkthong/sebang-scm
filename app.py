@@ -38,12 +38,12 @@ def load_custom_css():
 
 # --- Page Definitions ---
 PAGES = {
-    "대시보드": page_5_dashboard.show_page,
-    "주문등록": page_1_order_registration.show_page,
-    "주문승인": page_2_order_approval.show_page,
-    "입고등록": page_3_warehousing.show_page,
-    "출하계획": page_4_shipping_plan.show_page,
-    "출하등록": page_6_shipping_registration.show_page,
+    "대시보드": page_5_dashboard,
+    "주문등록": page_1_order_registration,
+    "주문승인": page_2_order_approval,
+    "입고등록": page_3_warehousing,
+    "출하계획": page_4_shipping_plan,
+    "출하등록": page_6_shipping_registration,
 }
 
 # --- Main Application Logic ---

@@ -118,7 +118,7 @@ def show_login_page():
                     st.session_state["user"] = user_info
                     st.success(message)
                     # 로그인 성공 후 대시보드로 이동
-                    st.switch_page("pages/5_대시보드.py")
+                    st.switch_page("pages/page_5_dashboard.py")
                 else:
                     st.error(message)
     
