@@ -4,6 +4,7 @@ from datetime import date
 from auth.auth import get_current_user
 from database.connection import get_db, close_db
 from database.models import OrderDetail
+from utils.order_dialog import show_order_detail_modal
 from services.shipping_service import (
     get_orders_for_shipping_plan,
     get_item_inventory_status,
@@ -39,10 +40,16 @@ def render_page_content(db, user):
         return
 
     for order in orders_for_planning:
-        expander_title = f"**{order.order_no}** | {order.customer_company} | {order.order_date.strftime('%Y-%m-%d')}"
-        with st.expander(expander_title):
-            render_shipping_item_form(db, user, order)
-            render_shipping_plan_history(db, order)
+        # 주문 카드 레이아웃
+        col1, col2 = st.columns([5, 1])
+        with col1:
+            expander_title = f"**{order.order_no}** | {order.customer_company} | {order.order_date.strftime('%Y-%m-%d')}"
+            with st.expander(expander_title):
+                render_shipping_item_form(db, user, order)
+                render_shipping_plan_history(db, order)
+        with col2:
+            if st.button("📋", key=f"detail_{order.order_no}", help=f"{order.order_no} 상세보기"):
+                show_order_detail_modal(order.order_no)
 
 def render_shipping_item_form(db, user, order):
     """Renders the form to input shipping quantities and dates for a specific order."""

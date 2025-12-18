@@ -9,7 +9,8 @@ from pages import (
     page_3_warehousing,
     page_4_shipping_plan,
     page_5_dashboard,
-    page_6_shipping_registration
+    page_6_shipping_registration,
+    page_order_detail
 )
 
 # --- Page Configuration ---
@@ -94,6 +95,7 @@ PAGES = {
     "입고등록": page_3_warehousing,
     "출하계획": page_4_shipping_plan,
     "출하등록": page_6_shipping_registration,
+    "주문상세": page_order_detail,
 }
 
 # --- Main Application Logic ---
@@ -125,9 +127,18 @@ def main():
     page_function = PAGES.get(current_page_name)
 
     if page_function:
-        page_function()
+        try:
+            page_function()
+        except Exception as e:
+            st.error(f"페이지 렌더링 중 오류가 발생했습니다: {str(e)}")
+            import traceback
+            st.code(traceback.format_exc())
+            # 오류 발생 시 대시보드로 이동
+            st.session_state.current_page = "대시보드"
+            st.rerun()
     else:
-        st.error("페이지를 찾을 수 없습니다.")
+        st.error(f"페이지를 찾을 수 없습니다. (요청된 페이지: {current_page_name})")
+        st.write("사용 가능한 페이지:", list(PAGES.keys()))
         st.session_state.current_page = "대시보드"
         st.rerun()
 

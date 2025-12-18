@@ -3,6 +3,7 @@ import pandas as pd
 from auth.auth import get_current_user
 from database.connection import get_db, close_db
 from utils.validators import validate_priority
+from utils.order_dialog import show_order_detail_modal
 from config import PRIORITY_MIN, PRIORITY_MAX, PRIORITY_DEFAULT, ORDER_STATUS
 from services.approval_service import (
     get_orders_for_approval,
@@ -46,12 +47,32 @@ def render_page_content(db, user):
 
     st.markdown(f"### 주문 목록 (총 {len(orders)}건)")
     
+    # 헤더
+    header_cols = st.columns([2, 2, 2, 2, 1])
+    header_cols[0].write("**주문번호**")
+    header_cols[1].write("**고객사**")
+    header_cols[2].write("**주문일자**")
+    header_cols[3].write("**상태**")
+    header_cols[4].write("**상세보기**")
+    st.markdown("---")
+    
     # --- Interactive Order List ---
     for order in orders:
-        # Fetch details for each order to display in the expander
+        # Fetch details for each order
         _ , details, total_amount = get_order_details(db, order.order_no)
         
-        with st.expander(f"**{order.order_no}** | {order.customer_company} | {order.order_date.strftime('%Y-%m-%d')} | **상태: {order.status}**"):
+        # 주문 행
+        row_cols = st.columns([2, 2, 2, 2, 1])
+        row_cols[0].write(order.order_no)
+        row_cols[1].write(order.customer_company)
+        row_cols[2].write(order.order_date.strftime('%Y-%m-%d'))
+        row_cols[3].write(order.status)
+        with row_cols[4]:
+            if st.button("📋", key=f"detail_{order.order_no}", help=f"{order.order_no} 상세보기"):
+                show_order_detail_modal(order.order_no)
+        
+        # 주문 상세 및 승인 폼 (expander로 표시)
+        with st.expander(f"주문 상세 및 처리: {order.order_no}", expanded=False):
             render_order_details(order, details, total_amount)
             render_approval_form(db, user, order)
 

@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 from auth.auth import get_current_user
 from database.connection import get_db, close_db
+from utils.order_dialog import show_order_detail_modal
 from services.dashboard_service import (
     get_client_dashboard_data,
     get_manager_dashboard_data,
@@ -54,11 +55,28 @@ def render_client_dashboard(data):
     col4.metric("완료", data["completed_count"])
 
     st.markdown("### 최근 주문")
-    recent_orders_df = pd.DataFrame([{
-        "주문번호": o.order_no, "주문일자": o.order_date.strftime("%Y-%m-%d"),
-        "주문구분": o.order_type, "상태": o.status
-    } for o in data["recent_orders"]])
-    st.dataframe(recent_orders_df, use_container_width=True, hide_index=True)
+    if len(data["recent_orders"]) > 0:
+        # 헤더
+        header_cols = st.columns([2, 2, 2, 2, 1])
+        header_cols[0].write("**주문번호**")
+        header_cols[1].write("**주문일자**")
+        header_cols[2].write("**주문구분**")
+        header_cols[3].write("**상태**")
+        header_cols[4].write("**상세보기**")
+        st.markdown("---")
+        
+        # 각 주문 행
+        for order in data["recent_orders"]:
+            row_cols = st.columns([2, 2, 2, 2, 1])
+            row_cols[0].write(order.order_no)
+            row_cols[1].write(order.order_date.strftime("%Y-%m-%d"))
+            row_cols[2].write(order.order_type)
+            row_cols[3].write(order.status)
+            with row_cols[4]:
+                if st.button("📋", key=f"detail_recent_{order.order_no}", help=f"{order.order_no} 상세보기"):
+                    show_order_detail_modal(order.order_no)
+    else:
+        st.info("등록된 주문이 없습니다.")
 
 def render_manager_dashboard(data):
     """Dashboard for '주문담당자' (Order Manager)."""
@@ -73,13 +91,43 @@ def render_manager_dashboard(data):
 
     if data["urgent_orders"]:
         st.markdown("### 긴급 주문")
-        df = pd.DataFrame([{"주문번호": o.order_no, "고객사": o.customer_company, "상태": o.status} for o in data["urgent_orders"]])
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        # 헤더
+        header_cols = st.columns([2, 2, 2, 1])
+        header_cols[0].write("**주문번호**")
+        header_cols[1].write("**고객사**")
+        header_cols[2].write("**상태**")
+        header_cols[3].write("**상세보기**")
+        st.markdown("---")
+        
+        # 각 주문 행
+        for order in data["urgent_orders"]:
+            row_cols = st.columns([2, 2, 2, 1])
+            row_cols[0].write(order.order_no)
+            row_cols[1].write(order.customer_company)
+            row_cols[2].write(order.status)
+            with row_cols[3]:
+                if st.button("📋", key=f"detail_urgent_{order.order_no}", help=f"{order.order_no} 상세보기"):
+                    show_order_detail_modal(order.order_no)
     
     if data["pending_orders"]:
         st.markdown("### 승인 대기 주문")
-        df = pd.DataFrame([{"주문번호": o.order_no, "고객사": o.customer_company, "주문일자": o.order_date.strftime('%Y-%m-%d')} for o in data["pending_orders"]])
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        # 헤더
+        header_cols = st.columns([2, 2, 2, 1])
+        header_cols[0].write("**주문번호**")
+        header_cols[1].write("**고객사**")
+        header_cols[2].write("**주문일자**")
+        header_cols[3].write("**상세보기**")
+        st.markdown("---")
+        
+        # 각 주문 행
+        for order in data["pending_orders"]:
+            row_cols = st.columns([2, 2, 2, 1])
+            row_cols[0].write(order.order_no)
+            row_cols[1].write(order.customer_company)
+            row_cols[2].write(order.order_date.strftime('%Y-%m-%d'))
+            with row_cols[3]:
+                if st.button("📋", key=f"detail_pending_{order.order_no}", help=f"{order.order_no} 상세보기"):
+                    show_order_detail_modal(order.order_no)
 
 def render_manufacturer_dashboard(data):
     """Dashboard for '제조담당자' (Manufacturer)."""
@@ -91,8 +139,25 @@ def render_manufacturer_dashboard(data):
 
     if data["production_orders"]:
         st.markdown("### 생산 주문 목록")
-        df = pd.DataFrame([{"주문번호": o.order_no, "고객사": o.customer_company, "상태": o.status, "우선순위": o.priority} for o in data["production_orders"]])
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        # 헤더
+        header_cols = st.columns([2, 2, 2, 1, 1])
+        header_cols[0].write("**주문번호**")
+        header_cols[1].write("**고객사**")
+        header_cols[2].write("**상태**")
+        header_cols[3].write("**우선순위**")
+        header_cols[4].write("**상세보기**")
+        st.markdown("---")
+        
+        # 각 주문 행
+        for order in data["production_orders"]:
+            row_cols = st.columns([2, 2, 2, 1, 1])
+            row_cols[0].write(order.order_no)
+            row_cols[1].write(order.customer_company)
+            row_cols[2].write(order.status)
+            row_cols[3].write(order.priority or "N/A")
+            with row_cols[4]:
+                if st.button("📋", key=f"detail_prod_{order.order_no}", help=f"{order.order_no} 상세보기"):
+                    show_order_detail_modal(order.order_no)
 
     if data["recent_receipts"]:
         st.markdown("### 최근 입고 내역")

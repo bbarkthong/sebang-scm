@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import date
 from auth.auth import get_current_user
 from database.connection import get_db, close_db
+from utils.order_dialog import show_order_detail_modal
 from services.warehousing_service import (
     get_orders_for_warehousing,
     get_order_receipt_status,
@@ -40,15 +41,21 @@ def render_page_content(db, user):
     for order in orders_to_process:
         status = get_order_receipt_status(db, order.order_no)
         
-        expander_title = (
-            f"**{order.order_no}** | {order.customer_company} | "
-            f"**상태: {order.status}** | "
-            f"**진행률: {status['progress']:.1f}%**"
-        )
-        
-        with st.expander(expander_title):
-            render_receipt_form(db, user, order)
-            render_receipt_history(db, order.order_no)
+        # 주문 카드 레이아웃
+        col1, col2 = st.columns([5, 1])
+        with col1:
+            expander_title = (
+                f"**{order.order_no}** | {order.customer_company} | "
+                f"**상태: {order.status}** | "
+                f"**진행률: {status['progress']:.1f}%**"
+            )
+            
+            with st.expander(expander_title):
+                render_receipt_form(db, user, order)
+                render_receipt_history(db, order.order_no)
+        with col2:
+            if st.button("📋", key=f"detail_{order.order_no}", help=f"{order.order_no} 상세보기"):
+                show_order_detail_modal(order.order_no)
 
 def render_receipt_form(db, user, order):
     """Renders the form for registering incoming goods for a specific order."""
