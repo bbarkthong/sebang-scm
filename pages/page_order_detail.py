@@ -30,7 +30,7 @@ def show_page():
                 # 이전 페이지로 이동
                 if "order_detail_no" in st.session_state:
                     del st.session_state.order_detail_no
-                st.session_state.current_page = "주문승인"
+                st.session_state.current_page = "대시보드"
                 st.rerun()
         return
     

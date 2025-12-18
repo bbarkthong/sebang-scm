@@ -16,7 +16,6 @@ def show_page():
     Renders the main Dashboard page, routing to the correct view based on user role.
     """
     st.title("대시보드")
-    st.markdown("---")
 
     user = get_current_user()
     role = user.get("role", "")
@@ -29,14 +28,19 @@ def show_page():
         elif role == "주문담당자":
             data = get_manager_dashboard_data(db)
             render_manager_dashboard(data)
+            common_data = get_common_activity_data(db)
+            
+            common_data = get_common_activity_data(db)
+            render_common_activity(common_data)
         elif role == "제조담당자":
             data = get_manufacturer_dashboard_data(db, user["username"])
             render_manufacturer_dashboard(data)
+            
+            common_data = get_common_activity_data(db)
+            render_common_activity(common_data)
         else:
             st.warning("알 수 없는 역할입니다. 대시보드를 표시할 수 없습니다.")
         
-        common_data = get_common_activity_data(db)
-        render_common_activity(common_data)
     finally:
         close_db(db)
 
