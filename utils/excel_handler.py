@@ -28,8 +28,8 @@ def create_order_template():
             item_names = [item.item_name for item in items]
             unit_prices = [float(item.unit_price) for item in items]
         else:
-            item_names = ["분리막 A형", "분리막 B형"]
-            unit_prices = [1000.00, 1500.00]
+            item_names = ["ESS (Energy Storage System)", "EV 모듈 (Electric Vehicle Module)"]
+            unit_prices = [400000.00, 150000.00]
     finally:
         close_db(db)
     

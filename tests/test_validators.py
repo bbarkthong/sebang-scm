@@ -92,7 +92,7 @@ class TestItemValidation:
     
     def test_validate_item_name_valid(self):
         """유효한 품목명 테스트"""
-        is_valid, msg = validate_item_name("분리막 A형")
+        is_valid, msg = validate_item_name("ESS (Energy Storage System)")
         assert is_valid is True
     
     def test_validate_item_name_empty(self):

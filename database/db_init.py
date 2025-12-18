@@ -80,37 +80,30 @@ def init_db():
             default_items = [
                 {
                     "item_code": "ITEM001",
-                    "item_name": "분리막 A형",
+                    "item_name": "ESS (Energy Storage System)",
                     "lead_time_days": 30,  # 주문일자 기준 30일 후 납품 가능
-                    "unit_price": 1000.00,
+                    "unit_price": 400000.00,
                     "is_active": "Y"
                 },
                 {
                     "item_code": "ITEM002",
-                    "item_name": "분리막 B형",
+                    "item_name": "EV 모듈 (Electric Vehicle Module)",
                     "lead_time_days": 30,
-                    "unit_price": 1500.00,
+                    "unit_price": 150000.00,
                     "is_active": "Y"
                 },
                 {
                     "item_code": "ITEM003",
-                    "item_name": "분리막 C형",
+                    "item_name": "SV (가정: 차량용 보조전원/저전압 시스템 등 소형 팩)",
                     "lead_time_days": 45,
-                    "unit_price": 2000.00,
+                    "unit_price": 250000.00,
                     "is_active": "Y"
                 },
                 {
                     "item_code": "ITEM004",
-                    "item_name": "분리막 D형",
+                    "item_name": "PLBM (Parking LBM, 특정 제품군)",
                     "lead_time_days": 60,
-                    "unit_price": 2500.00,
-                    "is_active": "Y"
-                },
-                {
-                    "item_code": "ITEM005",
-                    "item_name": "분리막 E형",
-                    "lead_time_days": 20,
-                    "unit_price": 1200.00,
+                    "unit_price": 400000.00,
                     "is_active": "Y"
                 }
             ]
